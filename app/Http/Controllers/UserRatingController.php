@@ -77,7 +77,7 @@ class UserRatingController extends Controller
                 $sum /= $count;
             }
 
-            \App\User::where('id',$request->recipinet_id)->update(array(
+            \App\User::where('id',$request->recipient_id)->update(array(
                 "rating" =>$sum
             ));
 

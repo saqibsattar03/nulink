@@ -48,9 +48,10 @@ class UserFavoriteController extends Controller
         $user = $this->guard()->user();
         $userFavorites = UserFavorite::where('user_id', $user->id)->get();
 
-        return response()->json(array([
-            "userFavorites" => $userFavorites,
-        ]));
+        return $userFavorites;
+        // return response()->json(array([
+        //     "userFavorites" => $userFavorites,
+        // ]));
     }
 
     // public function getHairStylist()

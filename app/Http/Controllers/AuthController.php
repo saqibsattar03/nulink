@@ -31,12 +31,20 @@ class AuthController extends Controller
     public function login(Request $request)
     {
 
-
         $credentials = $request->only('email', 'password');
         $user = User::where('email',$request->email)->get()[0];
+        $userSalon = null;
 
         if ($token = $this->guard()->attempt($credentials)) {
-        return compact('token','user');
+            $user->setAttribute('token', $token);
+            if($user->type_id == '2'){
+
+              $userSalon =  UserSalon::where('user_id',$user->id)->get()[0];
+              $user->setAttribute('userSalon', $userSalon);
+
+            }
+            
+         return $user;
         }
 
         return response()->json(['error' => 'Unauthorized'], 401);
@@ -45,18 +53,19 @@ class AuthController extends Controller
     public function register(Request $request)
     {
 
-        if ($request->type == 'hair stylist') {
+        if ($request->type_id == '2') {
             $rules = [
                 'name' => 'required',
                 'email' => 'unique:users|required',
-                'phone' => 'unique:users|required',
+                'phone' => 'required',
                 'password' => 'required',
-                'type' => 'required',
-                'salonName' => 'required',
-                'salonPhone' => 'required',
-                'salonAddress' => 'required',
-                'salonServices' => 'required',
-                'salonTiming' => 'required'
+                'type_id' => 'required',
+                'salon_name' => 'required',
+                'salon_phone' => 'required',
+                'salon_address' => 'required',
+                'salon_services' => 'required',
+                'salon_timing' => 'required',
+                'salon_achievements' => 'required'
             ];
 
             $input = $request->only(
@@ -64,19 +73,22 @@ class AuthController extends Controller
                 'email',
                 'password',
                 'phone',
-                'type',
-                'salonName',
-                'salonPhone',
-                'salonAddress',
-                'salonServices',
-                'salonTiming');
-        } else {
+                'type_id',
+                'salon_name',
+                'salon_phone',
+                'salon_address',
+                'salon_services',
+                'salon_timing',
+                'salon_achievements'
+            );
+        }
+        else {
             $rules = [
                 'name' => 'required',
                 'email' => 'unique:users|required',
-                'phone' => 'unique:users|required',
+                'phone' => 'required',
                 'password' => 'required',
-                'type' => 'required'
+                'type_id' => 'required'
             ];
 
             $input = $request->only(
@@ -84,44 +96,97 @@ class AuthController extends Controller
                 'email',
                 'password',
                 'phone',
-                'type');
+                'type_id'
+            );
         }
         $validator = Validator::make($input, $rules);
 
         if ($validator->fails()) {
             return response()->json(['success' => false, 'error' => $validator->messages()]);
-        } else {
-            if ($request->file('profilePic')) {
-                $imageName = time() . '.' . $request->file('profilePic')->getClientOriginalExtension();
-                $request->file('profilePic')->move(public_path('images/users'), $imageName);
-            } else {
-                $imageName = "no-image.png";
-            }
+        }
+        
+            // if ($request->file('profile_pic')) {
+            //     $imageName = time() . '.' . $request->file('profile_pic')->getClientOriginalExtension();
+            //     $request->file('profile_pic')->move(public_path('images/users'), $imageName);
+            // } else {
+            //     $imageName = "no-image.png";
+            // }
             $user = User::create([
                 'name' => $request->name,
                 'email' => $request->email,
                 'phone' => $request->phone,
                 'password' => bcrypt($request->password),
-                'profilePic' => $imageName,
-                'type' => $request->type,
+                'type_id' => $request->type_id,
                 'about' => $request->about
             ]);
-            if ($request->type == "hair stylist") {
+            if ($request->type_id == "2") {
                 $userSalon = UserSalon::create([
                     'user_id' => $user->id,
-                    'name' => $request->salonName,
-                    'phone' => $request->salonPhone,
-                    'address' => $request->salonAddress,
-                    'services' => $request->salonServices,
-                    'timing' => $request->salonTiming,
-                    'achievements' => $request->salonAchievements
+                    'name' => $request->salon_name,
+                    'phone' => $request->salon_phone,
+                    'address' => $request->salon_address,
+                    'services' => $request->salon_services,
+                    'timing' => $request->salon_timing,
+                    'achievements' => $request->salon_achievements
                 ]);
             }
 
-            $token = auth()->login($user);
+            // $token = auth()->login($user);
+             return $this->login($request);
 
-            return $this->respondWithToken($token);
+            // return $this->respondWithToken($token);
+    
+    }
+
+    public function registerAsHairstylist(Request $request){
+
+        $rules = [
+            'userId' => 'required',
+            'salon_name' => 'required',
+            'salon_phone' => 'required',
+            'salon_address' => 'required',
+            'salon_services' => 'required',
+            'salon_timing' => 'required',
+            'salon_achievements' => 'required'
+
+        ];
+
+        $input = $request->only(
+            'userId',
+            'salon_name',
+            'salon_phone',
+            'salon_address',
+            'salon_services',
+            'salon_timing',
+            'salon_achievements'
+        );
+
+
+        $validator = Validator::make($input, $rules);
+
+        if ($validator->fails()) {
+            return response()->json(['success' => false, 'error' => $validator->messages()]);
         }
+
+        $user = User::where('id',$request->userId)->update(['type_id'=>'2']);
+        $userSalon = UserSalon::create([
+            'user_id' => $request->userId,
+            'name' => $request->salon_name,
+            'phone' => $request->salon_phone,
+            'address' => $request->salon_address,
+            'services' => $request->salon_services,
+            'timing' => $request->salon_timing,
+            'achievements' => $request->salon_achievements
+        ]);
+        return $userSalon;
+        // $usertype = $user->type;
+        // $user->type = 'Hair Stylist';
+
+        
+
+
+    
+        
     }
 
     /**

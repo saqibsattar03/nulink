@@ -35,18 +35,18 @@ class UserEditController extends Controller
         // dd('hvjvvh');
         $user = $this->guard()->user();
 
-        // dd($user);
+        // dd($user);   `
         $userid = $user->id;
         // dd($userid);
 
         $userEdits = UserEdit::where('user_id',$userid)->get();
         // dd($userEdits);
-        
-        return response()->json(array([
-            'userEdits' => $userEdits,
-            'success' => 'true',
-            'message' => 'User Edits Successfully retrieved'
-        ]));
+        return $userEdits;
+        // return response()->json(array([
+        //     'userEdits' => $userEdits,
+        //     'success' => 'true',
+        //     'message' => 'User Edits Successfully retrieved'
+        // ]));
         
     }
 
