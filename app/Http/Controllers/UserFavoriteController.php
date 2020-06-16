@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\UserFavorite;
 use App\UserSalon;
+use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -45,13 +46,15 @@ class UserFavoriteController extends Controller
      */
     public function getFavorites()
     {
+        // dd('bhsh');
         $user = $this->guard()->user();
         $userFavorites = UserFavorite::where('user_id', $user->id)->get();
-
-        return $userFavorites;
-        // return response()->json(array([
-        //     "userFavorites" => $userFavorites,
-        // ]));
+        $userFavoriteList = [];
+        foreach($userFavorites as $userFavorite){
+            $userFav = User::where('id',$userFavorite->id)->first();
+            array_push($userFavoriteList,$userFav);
+        }
+        return $userFavoriteList;
     }
 
     // public function getHairStylist()

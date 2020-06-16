@@ -16,3 +16,8 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome');
 });
+
+Route::post('send-email','EmailVerificationController@sendEmail');
+Route::get('verify-user', 'EmailVerificationController@verify');
+Route::get('changepassword','ForgotPasswordController@changePass');
+Route::post('reset-password','ForgotPasswordController@resetPassword');

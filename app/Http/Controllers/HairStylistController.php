@@ -11,13 +11,8 @@ class HairStylistController extends Controller
 {
     public function hairStylists()
     {
-    dd('sss');
         $hairStylist = UserSalon::all();
-        dd($hairStylist);
-        return response()->json(array([
-            'success'=>'true',
-            'msg'=>'hairstylist fetched',
-            'hairstylists'=>$hairStylist
-        ]));
+        // dd($hairStylist);
+        return $hairStylist;
     }
 }

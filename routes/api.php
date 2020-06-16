@@ -46,3 +46,5 @@ Route::group([
     //    });
     Route::get('hairstylists','HairStylistController@hairStylists');
     Route::get('getusers','UserController@getUser');
+    Route::post('user/forgotpassword','ForgotPasswordController@index');
+    Route::post('user/verify','EmailVerificationController@sendEmail');

@@ -30,12 +30,27 @@ class AuthController extends Controller
      */
     public function login(Request $request)
     {
+        $validateData = $request->validate([
+            'email' => 'required',
+            'password' => 'required'
+        ]);
 
-        $credentials = $request->only('email', 'password');
-        $user = User::where('email',$request->email)->get()[0];
+        // $userEmail = User::where('email',$request->email)->first();
+
+        // if(!$userEmail)
+        // {
+        //     return response()->json(['error' => 'User doesn\'t exist'],401  );
+        // }
+        // $credentials = $request->only('email', 'password');
+        $user = User::where('email',$request->email)->first();
+
+        if(!$user)
+        {
+            return response()->json(['error' => 'User doesn\'t exist'], 401);
+        }
         $userSalon = null;
 
-        if ($token = $this->guard()->attempt($credentials)) {
+        if ($token = $this->guard()->attempt($validateData)) {
             $user->setAttribute('token', $token);
             if($user->type_id == '2'){
 
@@ -47,7 +62,7 @@ class AuthController extends Controller
          return $user;
         }
 
-        return response()->json(['error' => 'Unauthorized'], 401);
+        return response()->json(['error' => 'Unauthorized'],401);
     }
 
     public function register(Request $request)
