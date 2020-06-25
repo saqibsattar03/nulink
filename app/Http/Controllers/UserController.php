@@ -36,12 +36,25 @@ class UserController extends Controller
     {
         $user = $this->guard()->user();
         $user_id = $user->id;
+
+
+        if($request->profile_pic){
+            $imagename = 'images/' . time(). '.' .$request->file('profile_pic')->getClientOriginalExtension();
+            $request->file('profile_pic')->move(\public_path('images'),$imagename);
+           
+            \App\User::where('id',$user_id)->update(array(
+                'profile_pic' =>$imagename,
+               ));
+        }
+
+
+      
         // dd($user_id);
         \App\User::where('id',$user_id)->update(array(
          'name' =>$request->name,
          'phone' =>$request->phone,
         //  'password' =>$request->password,
-         'profile_pic' =>$request->profile_pic,
+        //  'profile_pic' =>$request->profile_pic,
         //  'about' =>$request->about
         ));
         return 'profile updated';
@@ -53,6 +66,17 @@ class UserController extends Controller
         $user = $this->guard()->user();
         // $salon_id = $user->id;
         // dd($salon_id);
+
+        if($request->image){
+            $imagename = 'images/' . time(). '.' .$request->file('image')->getClientOriginalExtension();
+            $request->file('image')->move(\public_path('images'),$imagename);
+           
+            \App\UserSalon::where('user_id',$user->id)->update(array(
+                'image' =>$imagename,
+               ));
+        }
+
+
         \App\UserSalon::where('user_id',$user->id)->update(array(
             'name'=>$request->name,
             'phone' =>$request->phone,
@@ -61,8 +85,10 @@ class UserController extends Controller
             'timing' =>$request->timing,
             'achievements' =>$request->achievements,
             'about' =>$request->about
-
         ));
+
+       
+
         return response()->json(
             ['success'=> true,
                 'msg'=>'updated']
