@@ -60,7 +60,8 @@ class UserController extends Controller
             'services' =>$request->services,
             'timing' =>$request->timing,
             'achievements' =>$request->achievements,
-            'about' =>$request->about
+            'about' =>$request->about,
+            'image' =>$request->image
 
         ));
         return response()->json(

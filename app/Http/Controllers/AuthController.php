@@ -18,7 +18,7 @@ class AuthController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('auth:api', ['except' => ['login', 'register','registerAsHairstylist']]);
+        $this->middleware('auth:api', ['except' => ['login', 'register','registerAsHairstylist','socialSignUp']]);
     }
 
     /**
@@ -161,6 +161,32 @@ class AuthController extends Controller
 
             // return $this->respondWithToken($token);
     
+    }
+
+    public function socialSignUp(Request $request)
+    {
+        $validateData = $request->validate([
+            'email' => 'required',
+            'name' => 'required'
+            ]);
+            // dd('sdssd');
+        $user = User::where('email',$request->email)->first();
+        if($user)
+        {
+            return $user;    
+        }
+        else
+        {
+            $user = User::create([
+                'email' => $request->email,
+                'name' => $request->name,
+                'phone' =>'0',
+                'type_id' => 1,
+                'password' => 'abc'
+            ]);
+            return $user;
+        }
+
     }
 
     public function registerAsHairstylist(Request $request){
