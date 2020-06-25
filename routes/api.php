@@ -54,4 +54,5 @@ Route::group([
 //  Route::post('social-signup','AuthController@socialSigcUp');
 
  //save kar, yae route meny auth mai dala hua hai
+ 
 
