@@ -42,9 +42,9 @@ class UserController extends Controller
          'phone' =>$request->phone,
         //  'password' =>$request->password,
          'profile_pic' =>$request->profile_pic,
-         'about' =>$request->about
+        //  'about' =>$request->about
         ));
-        return 'lund kha';
+        return 'profile updated';
 
     }
 
@@ -58,13 +58,15 @@ class UserController extends Controller
             'phone' =>$request->phone,
             'address' =>$request->address,
             'services' =>$request->services,
-            'timing' =>$request->timing
-            
+            'timing' =>$request->timing,
+            'achievements' =>$request->achievements,
+            'about' =>$request->about
+
         ));
         return response()->json(
             ['success'=> true,
-    'msg'=>'fuck off 🖕']
-);
+                'msg'=>'updated']
+            );
         // dd($salon_id);
         }
 }

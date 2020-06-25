@@ -24,7 +24,6 @@ class CreateUsersTable extends Migration
             $table->mediumText("profile_pic")->nullable();
             $table->string('password');
             $table->double('rating')->default(0.0);
-            $table->mediumText('about')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });

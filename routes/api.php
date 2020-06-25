@@ -12,7 +12,8 @@ Route::group([
     Route::post('refresh', 'AuthController@refresh');
     Route::post('me', 'AuthController@me');
     Route::post('register','AuthController@register');
-    Route::post('register-hairstylist',"AuthController@registerAsHairstylist");
+
+    // Route::post('register-hairstylist',"AuthController@registerAsHairstylist");
 });
 
 Route::group([
@@ -48,3 +49,4 @@ Route::group([
     Route::get('getusers','UserController@getUser');
     Route::post('user/forgotpassword','ForgotPasswordController@index');
     Route::post('user/verify','EmailVerificationController@sendEmail');
+    Route::post('register-hairstylist',"AuthController@registerAsHairstylist");

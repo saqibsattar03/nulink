@@ -10,6 +10,6 @@ class UserSalon extends Model
     use Notifiable;
 
     protected $fillable = [
-        'user_id','name', 'phone', 'address','services','timing','achievements'
+        'user_id','name', 'phone','about','address','services','timing','achievements','image'
     ];
 }

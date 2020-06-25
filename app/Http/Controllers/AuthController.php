@@ -18,7 +18,7 @@ class AuthController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('auth:api', ['except' => ['login', 'register']]);
+        $this->middleware('auth:api', ['except' => ['login', 'register','registerAsHairstylist']]);
     }
 
     /**
@@ -62,7 +62,7 @@ class AuthController extends Controller
          return $user;
         }
 
-        return response()->json(['error' => 'Unauthorized'],401);
+        return response()->json(['error' => 'Incorrect password'],401);
     }
 
     public function register(Request $request)
@@ -73,7 +73,9 @@ class AuthController extends Controller
                 'name' => 'required',
                 'email' => 'unique:users|required',
                 'phone' => 'required',
+                'image' => 'required|image:png,jpg,jpeg',
                 'password' => 'required',
+                'about' => 'required',
                 'type_id' => 'required',
                 'salon_name' => 'required',
                 'salon_phone' => 'required',
@@ -87,10 +89,12 @@ class AuthController extends Controller
                 'name',
                 'email',
                 'password',
+                'image',
                 'phone',
                 'type_id',
                 'salon_name',
                 'salon_phone',
+                'about',
                 'salon_address',
                 'salon_services',
                 'salon_timing',
@@ -117,7 +121,7 @@ class AuthController extends Controller
         $validator = Validator::make($input, $rules);
 
         if ($validator->fails()) {
-            return response()->json(['success' => false, 'error' => $validator->messages()]);
+            return response()->json(['success' => false, 'error' => $validator->messages()],409);
         }
         
             // if ($request->file('profile_pic')) {
@@ -132,13 +136,19 @@ class AuthController extends Controller
                 'phone' => $request->phone,
                 'password' => bcrypt($request->password),
                 'type_id' => $request->type_id,
-                'about' => $request->about
             ]);
+
             if ($request->type_id == "2") {
+                
+                $imagename = 'images/' + time(). '.' .$request->file('image')->getClientOriginalExtension();
+                $request->file('image')->move(\public_path('images'),$imagename);
+
                 $userSalon = UserSalon::create([
                     'user_id' => $user->id,
                     'name' => $request->salon_name,
                     'phone' => $request->salon_phone,
+                    'about' => $request->about,
+                    'image' => $imagename,
                     'address' => $request->salon_address,
                     'services' => $request->salon_services,
                     'timing' => $request->salon_timing,
@@ -156,26 +166,30 @@ class AuthController extends Controller
     public function registerAsHairstylist(Request $request){
 
         $rules = [
-            'userId' => 'required',
+            'user_id' => 'required',
             'salon_name' => 'required',
             'salon_phone' => 'required',
             'salon_address' => 'required',
             'salon_services' => 'required',
+            'image' => 'required|image:png,jpg,jpeg',
+            'about' => 'required',
             'salon_timing' => 'required',
             'salon_achievements' => 'required'
 
         ];
 
         $input = $request->only(
-            'userId',
+            'user_id',
+            'about',
             'salon_name',
+            'image',
             'salon_phone',
             'salon_address',
             'salon_services',
             'salon_timing',
             'salon_achievements'
         );
-
+        
 
         $validator = Validator::make($input, $rules);
 
@@ -183,10 +197,15 @@ class AuthController extends Controller
             return response()->json(['success' => false, 'error' => $validator->messages()]);
         }
 
-        $user = User::where('id',$request->userId)->update(['type_id'=>'2']);
+        $imagename = time(). '.' .$request->file('image')->getClientOriginalExtension();
+        $request->file('image')->move(\public_path('images'),$imagename);
+        
+        $user = User::where('id',$request->user_id)->update(['type_id'=>'2']);
         $userSalon = UserSalon::create([
-            'user_id' => $request->userId,
+            'user_id' => $request->user_id,
             'name' => $request->salon_name,
+            'about' => $request->about,
+            'image' => $imagename,
             'phone' => $request->salon_phone,
             'address' => $request->salon_address,
             'services' => $request->salon_services,
@@ -195,13 +214,7 @@ class AuthController extends Controller
         ]);
         return $userSalon;
         // $usertype = $user->type;
-        // $user->type = 'Hair Stylist';
-
-        
-
-
-    
-        
+        // $user->type = 'Hair Stylist';        
     }
 
     /**
