@@ -5,17 +5,21 @@ Route::group([
 
 ], function () {
     Route::post('login', 'AuthController@login');
-    Route::get('login', function() {
-        return "Unauthorized";
-    })->name('login');
     Route::post('logout', 'AuthController@logout');
     Route::post('refresh', 'AuthController@refresh');
     Route::post('me', 'AuthController@me');
     Route::post('register','AuthController@register');
     Route::post('social-signup',"AuthController@socialSignUp");
+    Route::post('change-password', 'AuthController@changePassword');
+
 
     // Route::post('register-hairstylist',"AuthController@registerAsHairstylist");
 });
+
+    Route::get('/',function(){
+        return 'This is root for Nulink API';
+    });
+
 
 Route::group([
     "middleware" => "auth:api"
@@ -26,22 +30,23 @@ Route::group([
     Route::post('user/favorite','UserFavoriteController@postFavorite');
     Route::post('user/edit','UserEditController@userUpdate');
     Route::get('user/edit','UserEditController@userEdit');
+    Route::delete('user/edit/{id}','UserEditController@deleteImage');
 
     //user profile update route//
-    Route::post('user/edit-profile','UserController@editUserProfile');
-    
+    Route::post('edit-profile','UserController@editUserProfile');
+
     //user salon update route//
 
-    Route::post('user/edit-salon','UserController@editUserSalon');
-    
-    
-    
-    Route::delete('user/image/{id}','UserEditController@deleteImage');
-    
-    Route::get('user/rating/{id}','UserRatingController@userRating');
+    Route::post('edit-salon','UserController@editUserSalon');
+
+
+
+//    Route::delete('user/image/{id}','UserEditController@deleteImage');
+
+    Route::get('user-rating/{id}','UserRatingController@userRating');
     Route::post('user/rating',"UserRatingController@postUserRating");
-    
-    
+
+
 });
 //     Route::get('hairstylists',function(){
     //             return 'hair stylist route';

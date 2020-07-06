@@ -48,13 +48,24 @@ class UserFavoriteController extends Controller
     {
         // dd('bhsh');
         $user = $this->guard()->user();
-        $userFavorites = UserFavorite::where('user_id', $user->id)->get();
-        $userFavoriteList = [];
-        foreach($userFavorites as $userFavorite){
-            $userFav = User::where('id',$userFavorite->id)->first();
-            array_push($userFavoriteList,$userFav);
-        }
-        return $userFavoriteList;
+        // $userFavorites = UserFavorite::where('user_id', $user->id)->get();
+        // $userFavoriteList = [];
+        // foreach($userFavorites as $userFavorite){
+        //     $userFav = User::where('id',$userFavorite->id)->first();
+        //     array_push($userFavoriteList,$userFav);
+        // }
+        // return $userFavoriteList;
+
+         $userFavoriteList = [];
+            $userFavoriteList = UserFavorite::where('user_id',$user->id)->pluck('hairstylist_id')->toArray();
+            
+            $saved = [];
+            for ($i  = 0; $i < count($userFavoriteList); $i++) {
+                array_push($saved, UserSalon::where('id', $userFavoriteList[$i])->get()[0]);
+            }
+            
+        return $saved;
+     
     }
 
     // public function getHairStylist()

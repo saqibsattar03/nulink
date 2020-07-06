@@ -20,10 +20,11 @@ class CreateUserSalonsTable extends Migration
             $table->string('name');
             $table->mediumText('image');
             $table->string('phone');
+            $table->double('rating')->default(0.0);
             $table->mediumText('about')->nullable();
             $table->mediumText('address');
             $table->mediumText("services")->nullable();
-            $table->string('timing')->nullable();
+            $table->mediumText('timing')->nullable();
             $table->mediumText('achievements')->nullable();
             $table->timestamps();
         });

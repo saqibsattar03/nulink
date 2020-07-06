@@ -24,7 +24,7 @@ class UserRatingController extends Controller
             // echo $rating->rating;
             $total = $total + $rating->rating;
             $count++;
-            
+
         }
 
         if ($count > 0) {
@@ -41,19 +41,23 @@ class UserRatingController extends Controller
             'rating' => 0,
             'count' => 0
         ]);
-       
+
         // $hairStylist->id;
     }
 
     public function postUserRating(Request $request)
     {
         $user = $this->guard()->user();
-        
-        $this->validate($request, array(  
-            'recipient_id' => 'required',
-            'rating' => 'required|integer|between:1,5',
-        ));
-    
+
+
+
+        $rated = UserRating::where('sender_id',$user->id)->where('recipient_id',$request->recipient_id)->first();
+        if($rated){
+            return \response()->json([
+                'error' => 'You have already rated this hairstylist!'
+            ],500);
+        }
+
         UserRating::create([
                 'sender_id' => $user->id,
                 'recipient_id' => $request->recipient_id,
@@ -77,7 +81,7 @@ class UserRatingController extends Controller
                 $sum /= $count;
             }
 
-            \App\User::where('id',$request->recipient_id)->update(array(
+            \App\UserSalon::where('id',$request->recipient_id)->update(array(
                 "rating" =>$sum
             ));
 

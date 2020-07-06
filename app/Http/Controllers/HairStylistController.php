@@ -11,7 +11,7 @@ class HairStylistController extends Controller
 {
     public function hairStylists()
     {
-        $hairStylist = UserSalon::all();
+        $hairStylist = UserSalon::orderBy('created_at','desc')->get();
         // dd($hairStylist);
         return $hairStylist;
     }

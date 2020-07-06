@@ -32,22 +32,9 @@ class UserEditController extends Controller
 
     public function userEdit(Request $request)
     {
-        // dd('hvjvvh');
         $user = $this->guard()->user();
-
-        // dd($user);   `
-        $userid = $user->id;
-        // dd($userid);
-
-        $userEdits = UserEdit::where('user_id',$userid)->get();
-        // dd($userEdits);
+        $userEdits = UserEdit::where('user_id',$user->id)->get();
         return $userEdits;
-        // return response()->json(array([
-        //     'userEdits' => $userEdits,
-        //     'success' => 'true',
-        //     'message' => 'User Edits Successfully retrieved'
-        // ]));
-        
     }
 
     public function userUpdate(Request $request)
@@ -67,43 +54,40 @@ class UserEditController extends Controller
 
         if($validator->fails()){
             return response()->json([
-                'success' => 'false',
                 'error' => $validator->messages()
-            ]);
+            ],500);
         }
 
         if($request->file('image')){
 
-        $imagename = time(). '.' .$request->file('image')->getClientOriginalExtension();
+        $imagename = 'images/' . time(). '.' .$request->file('image')->getClientOriginalExtension();
         // dd($imagename);
-        $request->file('image')->move(\public_path('images/useredits'),$imagename);
-        
+        $request->file('image')->move(\public_path('images'),$imagename);
+
         UserEdit::create([
             'user_id' => $user->id,
             'name' => $request->name == null ? "Untitled" : $request->name,
-            'image' => $imagename 
+            'image' => $imagename
             ]);
-        return response()->json(['success' => 'true', 'message' => 'Successfully added User Edit.']);
+        return response()->json([ 'message' => 'Successfully added User Edit.']);
         }
 
     }
 
     public function deleteImage($id){
         $image_path = UserEdit::select('image')->where('id',$id)->first();
-        // dd($image_path);
-        $file_path = 'images/useredits/' .$image_path->image;
-        // dd($file_path);
+        $file_path = $image_path->image;
 
         if(file_exists($file_path)){
             @unlink($file_path);
-            UserEdit::where('id',$id)->delete();       
+            UserEdit::where('id',$id)->delete();
         }
-        else 
+        else
         {
             UserEdit::where('id',$id)->delete();
         }
-        
+
         return response()->json(['success' => 'true', 'message' => 'Image Deleted Successfully' ]);
-    
+
     }
 }

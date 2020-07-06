@@ -39,25 +39,36 @@ class UserController extends Controller
 
 
         if($request->profile_pic){
+
+            $file_path =  \App\User::where('id',$user_id)->first()['profile_pic'];
+
+            if(file_exists($file_path)){
+                @unlink($file_path);
+            }
+
             $imagename = 'images/' . time(). '.' .$request->file('profile_pic')->getClientOriginalExtension();
             $request->file('profile_pic')->move(\public_path('images'),$imagename);
-           
+
             \App\User::where('id',$user_id)->update(array(
                 'profile_pic' =>$imagename,
                ));
         }
 
 
-      
+
         // dd($user_id);
         \App\User::where('id',$user_id)->update(array(
          'name' =>$request->name,
          'phone' =>$request->phone,
-        //  'password' =>$request->password,
-        //  'profile_pic' =>$request->profile_pic,
-        //  'about' =>$request->about
         ));
-        return 'profile updated';
+
+        $user = User::where('id', $user_id)->first();
+        $token = auth()->tokenById($user_id);
+        $user->setAttribute('token', $token);
+        $userSalon = \App\UserSalon::where('user_id', $user->id)->first();
+        $user->setAttribute('userSalon', $userSalon);
+
+        return $user;
 
     }
 
@@ -68,16 +79,19 @@ class UserController extends Controller
         // dd($salon_id);
 
         if($request->image){
+            $file_path = \App\UserSalon::where('user_id',$user->id)->first()['image'];
             $imagename = 'images/' . time(). '.' .$request->file('image')->getClientOriginalExtension();
             $request->file('image')->move(\public_path('images'),$imagename);
-           
+
+
             \App\UserSalon::where('user_id',$user->id)->update(array(
                 'image' =>$imagename,
                ));
+            @unlink($file_path);
         }
 
 
-        \App\UserSalon::where('user_id',$user->id)->update(array(
+       \App\UserSalon::where('user_id',$user->id)->update(array(
             'name'=>$request->name,
             'phone' =>$request->phone,
             'address' =>$request->address,
@@ -87,12 +101,11 @@ class UserController extends Controller
             'about' =>$request->about
         ));
 
-       
-
-        return response()->json(
-            ['success'=> true,
-                'msg'=>'updated']
-            );
+        $userSalon = \App\UserSalon::where('user_id', $user->id)->first();
+        return $userSalon;
+//        $user->setAttribute('userSalon', $userSalon);
+//
+//        return $user;
         // dd($salon_id);
         }
 }

@@ -1,9 +1,10 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use Illuminate\Support\Facades\Hash;
 use App\User;
 use App\UserSalon;
+use Illuminate\Http\Response;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
@@ -46,7 +47,7 @@ class AuthController extends Controller
 
         if(!$user)
         {
-            return response()->json(['error' => 'User doesn\'t exist'], 401);
+            return response()->json(['error' => 'User doesn\'t exist'], 500);
         }
         $userSalon = null;
 
@@ -58,11 +59,11 @@ class AuthController extends Controller
               $user->setAttribute('userSalon', $userSalon);
 
             }
-            
+
          return $user;
         }
 
-        return response()->json(['error' => 'Incorrect password'],401);
+        return response()->json(['error' => 'Incorrect password'],500);
     }
 
     public function register(Request $request)
@@ -121,15 +122,9 @@ class AuthController extends Controller
         $validator = Validator::make($input, $rules);
 
         if ($validator->fails()) {
-            return response()->json(['success' => false, 'error' => $validator->messages()],409);
+            return response()->json(['error' => $validator->messages()],409);
         }
-        
-            // if ($request->file('profile_pic')) {
-            //     $imageName = time() . '.' . $request->file('profile_pic')->getClientOriginalExtension();
-            //     $request->file('profile_pic')->move(public_path('images/users'), $imageName);
-            // } else {
-            //     $imageName = "no-image.png";
-            // }
+
             $user = User::create([
                 'name' => $request->name,
                 'email' => $request->email,
@@ -139,8 +134,8 @@ class AuthController extends Controller
             ]);
 
             if ($request->type_id == "2") {
-                
-                $imagename = 'images/' + time(). '.' .$request->file('image')->getClientOriginalExtension();
+
+                $imagename = 'images/' . time(). '.' .$request->file('image')->getClientOriginalExtension();
                 $request->file('image')->move(\public_path('images'),$imagename);
 
                 $userSalon = UserSalon::create([
@@ -160,7 +155,7 @@ class AuthController extends Controller
              return $this->login($request);
 
             // return $this->respondWithToken($token);
-    
+
     }
 
     public function registerAsHairstylist(Request $request){
@@ -189,19 +184,19 @@ class AuthController extends Controller
             'salon_timing',
             'salon_achievements'
         );
-        
+
 
         $validator = Validator::make($input, $rules);
 
         if ($validator->fails()) {
-            return response()->json(['success' => false, 'error' => $validator->messages()]);
+            return response()->json(['error' => $validator->messages()],500);
         }
 
-        $imagename = time(). '.' .$request->file('image')->getClientOriginalExtension();
+        $imagename = 'images/' . time(). '.' .$request->file('image')->getClientOriginalExtension();
         $request->file('image')->move(\public_path('images'),$imagename);
-        
+
         $user = User::where('id',$request->user_id)->update(['type_id'=>'2']);
-        $userSalon = UserSalon::create([
+        UserSalon::create([
             'user_id' => $request->user_id,
             'name' => $request->salon_name,
             'about' => $request->about,
@@ -212,34 +207,32 @@ class AuthController extends Controller
             'timing' => $request->salon_timing,
             'achievements' => $request->salon_achievements
         ]);
-        return $userSalon;
-        // $usertype = $user->type;
-        // $user->type = 'Hair Stylist';        
+
+        return UserSalon::where('user_id',$request->user_id)->first();
+
     }
 
 
     public function socialSignUp(Request $request)
     {
-        $validateData = $request->validate([
-            'email' => 'required',
-            'name' => 'required'
-            ]);
-            // dd('sdssd');
         $user = User::where('email',$request->email)->first();
+        $userSalon=null;
+
         if($user)
         {
-            return $user;    
+            return $this->login($request);
         }
+
         else
         {
             $user = User::create([
                 'email' => $request->email,
                 'name' => $request->name,
-                'phone' =>'0',
                 'type_id' => 1,
-                'password' => 'abc'
+                'social' => true,
+                'password' => bcrypt('abc')
             ]);
-            return $user;
+            return $this->login($request);
         }
 
     }
@@ -258,6 +251,23 @@ class AuthController extends Controller
             "user" => $user,
             "userSalon" => $userSalon
         ]));
+    }
+
+
+    public function changePassword(Request $request)
+    {
+        $user = $this->guard()->user();
+        $check = Hash::check(request('old_password'),$user->password);
+        if($check)
+        {
+            $user->update([
+                'password'=>bcrypt(request('password'))
+            ]);
+            return $user;
+        }else
+        {
+            return response()->json(['error' => 'Incorrect old password'],401);
+        }
     }
 
     /**
@@ -307,7 +317,7 @@ class AuthController extends Controller
     {
         return Auth::guard();
     }
-    
+
     public function getHairStylist()
     {
         $hairStylists = User::where('type',"hair stylist")->get();
