@@ -17,6 +17,10 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+Route::get('privacy-policy', function () {
+    return view('privacy-policy');
+});
+
 Route::post('send-email','EmailVerificationController@sendEmail');
 Route::get('verify-user', 'EmailVerificationController@verify');
 Route::get('changepassword','ForgotPasswordController@changePass');
